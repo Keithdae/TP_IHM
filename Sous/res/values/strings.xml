@@ -8,5 +8,6 @@
     <string name="dollars_label">Dollars</string>
     <string name="change_label">Taux d\'échange</string>
     <string name="button_convert">Convertir</string>
+    <string name="button_search">Chercher le taux d\'échange</string>
 
 </resources>

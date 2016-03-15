@@ -28,6 +28,7 @@ public final class R {
     public static final class string {
         public static final int app_name=0x7f040000;
         public static final int button_convert=0x7f040006;
+        public static final int button_search=0x7f040007;
         public static final int change_label=0x7f040005;
         public static final int dollars_label=0x7f040004;
         public static final int euros_label=0x7f040003;

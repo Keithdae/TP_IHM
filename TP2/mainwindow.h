@@ -14,6 +14,7 @@
 #include <QDockWidget>
 #include <QSlider>
 #include <QColorDialog>
+#include <QDataStream>
 
 #include <QDebug>
 

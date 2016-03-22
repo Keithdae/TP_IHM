@@ -76,7 +76,7 @@ void MainWindow::openFile()
 
 void MainWindow::saveFile()
 {
-    QString fileName = QFileDialog::getOpenFileName( this,
+    QString fileName = QFileDialog::getSaveFileName( this,
                                                     tr("Save File"), // titre
                                                     "~/", // répertoire initial
                                                     tr("Html Files (*.html)") // filtre

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "drawarea.h"
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -139,16 +140,57 @@ void MainWindow::openFile()
     QString fileName = QFileDialog::getOpenFileName( this,
                                                     tr("Open File"), // titre
                                                     "~/", // répertoire initial
-                                                    tr("Html Files (*.html)") // filtre
+                                                    tr("Derp Files (*.derp)") // filtre
                                                     );
     QFile file(fileName);
     if(file.open(QIODevice::ReadOnly))
     {
         qDebug() << "Ouverture reussie du fichier en lecture : " << fileName;
-        QTextStream stream(&file);
-        QString content = stream.readAll();
-        QTextEdit* textEdit = this->findChild<QTextEdit*>();
-        textEdit->setHtml(content);
+        drawArea* draw = this->findChild<drawArea*>();
+        if(draw != 0)
+        {
+            QDataStream in(&file);
+            std::vector<shape> sh;
+            qint32 shSize;
+            in >> shSize;
+            for(int i=0; i<shSize; i++)
+            {
+                shape curShape;
+                qint32 type;
+                in >> type;
+                QPen pen;
+                in >> pen;
+                QPoint start;
+                in >> start;
+                QPoint end;
+                in >> end;
+                std::vector<QPoint> points;
+                if(type == POLYLINE || type == POLYGON)
+                {
+                    qint32 pointsSize;
+                    in >> pointsSize;
+                    for(int j=0; j<pointsSize; j++)
+                    {
+                        QPoint p;
+                        in >> p;
+                        points.push_back(p);
+                    }
+                }
+                curShape.setType(type);
+                curShape.setPen(pen);
+                curShape.setStart(start);
+                curShape.setEnd(end);
+                if(points.size() > 0)
+                {
+                    curShape.setPoints(points);
+                    points.clear();
+                }
+                sh.push_back(curShape);
+            }
+
+            draw->setShapes(sh);
+            draw->update();
+        }
     }
     else
     {
@@ -158,19 +200,40 @@ void MainWindow::openFile()
 
 void MainWindow::saveFile()
 {
-    QString fileName = QFileDialog::getOpenFileName( this,
+    QString fileName = QFileDialog::getSaveFileName( this,
                                                     tr("Save File"), // titre
                                                     "~/", // répertoire initial
-                                                    tr("Html Files (*.html)") // filtre
+                                                    tr("Derp Files (*.derp)") // filtre
                                                     );
     QFile file(fileName);
     if(file.open(QIODevice::WriteOnly))
     {
         qDebug() << "Ouverture reussie du fichier en ecriture : " << fileName;
-        QTextEdit* textEdit = this->findChild<QTextEdit*>();
-        QString text = textEdit->toHtml();
-        QTextStream stream(&file);
-        stream << text;
+        drawArea* draw = this->findChild<drawArea*>();
+        if(draw != 0)
+        {
+            QDataStream out(&file);
+            std::vector<shape> sh = draw->getShapes();
+            out << (qint32) sh.size();
+            for(unsigned int i=0; i<sh.size(); i++)
+            {
+                shape curShape = sh[i];
+                int type = curShape.getType();
+                out << (qint32) type;
+                out << curShape.getPen();
+                out << curShape.getStart();
+                out << curShape.getEnd();
+                if(type == POLYLINE || type == POLYGON)
+                {
+                    std::vector<QPoint> points = curShape.getPoints();
+                    out << (qint32) points.size();
+                    for(unsigned int j=0; j<points.size(); j++)
+                    {
+                        out << points[j];
+                    }
+                }
+            }
+        }
     }
     else
     {

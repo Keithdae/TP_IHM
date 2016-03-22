@@ -28,8 +28,9 @@ class shape
         int getType(){return type;}
 
         void addPoint(QPoint nPoint){points.push_back(nPoint);}
+        void setPoints(std::vector<QPoint> nPoints){this->points = nPoints;}
         std::vector<QPoint> getPoints(){return points;}
-        void clearPoints(){points.clear();}
+        void clearPoints();
 
 
     private:

@@ -22,6 +22,9 @@ public:
     QSize sizeHint() const;
     QSize minimumSizeHint() const;
 
+    std::vector<shape> getShapes(){return this->shapes;}
+    void setShapes(std::vector<shape> nShapes){this->shapes = nShapes;}
+
 protected:
     void mousePressEvent(QMouseEvent* e );
     void mouseReleaseEvent(QMouseEvent* e);

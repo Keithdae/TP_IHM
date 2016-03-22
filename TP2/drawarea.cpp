@@ -26,17 +26,23 @@ void drawArea::mousePressEvent(QMouseEvent* e)
     if(e->button() == Qt::LeftButton)
     {
         released = false;
-        currentShape.setStart(e->pos());
-        currentShape.setPen(this->pen);
-        currentShape.setType(this->type);
+        if(currentShape.getStart().isNull())
+        {
+            currentShape.setStart(e->pos());
+            currentShape.setPen(this->pen);
+            currentShape.setType(this->type);
+        }
     }
 }
 
 
 void drawArea::mouseMoveEvent(QMouseEvent* e)
 {
-   currentShape.setEnd(e->pos());
-   update(this->rect());
+    if(e->buttons() & Qt::LeftButton)
+    {
+        currentShape.setEnd(e->pos());
+        update(this->rect());
+    }
 }
 
 void drawArea::mouseReleaseEvent(QMouseEvent* e)
@@ -60,13 +66,16 @@ void drawArea::mouseReleaseEvent(QMouseEvent* e)
 
 void drawArea::mouseDoubleClickEvent(QMouseEvent *e)
 {
-    if(e->button() == Qt::LeftButton)
+    if(!released)
     {
-        currentShape.setEnd(e->pos());
-        shapes.push_back(currentShape);
-        currentShape.clearPoints();
-        released = true;
-        update(this->rect());
+        if(e->button() == Qt::RightButton)
+        {
+            currentShape.setEnd(currentShape.getPoints().back());
+            shapes.push_back(currentShape);
+            currentShape.clearPoints();
+            released = true;
+            update(this->rect());
+        }
     }
 }
 
@@ -112,18 +121,32 @@ void drawArea::drawShape(shape figure, QPainter & painter)
         painter.drawPath(path);
         break;
     case POLYLINE:
+    {
         path = QPainterPath(figure.getStart());
         std::vector<QPoint> points = figure.getPoints();
         for(unsigned int i=0; i<points.size(); i++)
         {
             path.lineTo(points[i]);
         }
-        path.lineTo(figure.getEnd());
+        if(!figure.getEnd().isNull())
+            path.lineTo(figure.getEnd());
         painter.drawPath(path);
         break;
-    //case POLYGON:
-
-       // break;
+    }
+    case POLYGON:
+    {
+        path = QPainterPath(figure.getStart());
+        std::vector<QPoint> points = figure.getPoints();
+        for(unsigned int i=0; i<points.size(); i++)
+        {
+            path.lineTo(points[i]);
+        }
+        if(!figure.getEnd().isNull())
+            path.lineTo(figure.getEnd());
+        path.lineTo(figure.getStart());
+        painter.drawPath(path);
+        break;
+    }
     }
 
 }
